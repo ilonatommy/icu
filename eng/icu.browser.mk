@@ -1,5 +1,6 @@
 ENV_INIT_SCRIPT = source $(EMSDK_PATH)/emsdk_env.sh &&
 ENV_CONFIGURE_WRAPPER = emconfigure
+ICU_SHARDING = true
 
 ifeq ($(WASM_ENABLE_THREADS),true)
 	THREADS_FLAG="-pthread"
