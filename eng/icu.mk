@@ -128,9 +128,10 @@ dictionary:
 
 shards: dictionary $(DATA_SHARDS) 
 
-# build source+data for the main "icudt" filter and only data for the other filters
+BUILD_DATA := lib-icudt data-icudt data-icudt_no_CJK data-icudt_EFIGS data-icudt_CJK
+# sharded files are produced only when sharding is enabled
 ifeq ($(ICU_SHARDING), true)
-all: lib-icudt data-icudt data-icudt_no_CJK data-icudt_EFIGS data-icudt_CJK dictionary shards
-else
-all: lib-icudt data-icudt data-icudt_no_CJK data-icudt_EFIGS data-icudt_CJK 
+BUILD_DATA := $(BUILD_DATA) shards
 endif
+
+all: $(BUILD_DATA)
