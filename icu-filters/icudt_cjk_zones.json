@@ -1,0 +1,32 @@
+{
+  "featureFilters": {
+    "zone_tree": "include",
+    "misc": {
+      "whitelist": [
+        "metaZones",
+        "zoneinfo64"
+      ]
+    }
+  },
+  "localeFilter": {
+    "filterType": "language",
+    "includeScripts": true,
+    "includeChildren": true,
+    "whitelist": [
+      "en",
+      "zh",
+      "ja",
+      "ko"
+    ]
+  },
+  "resourceFilters": [
+    {
+      "categories": [
+        "zone_tree"
+      ],
+      "rules": [
+        "+/zoneStrings/*"
+      ]
+    }
+  ]
+}

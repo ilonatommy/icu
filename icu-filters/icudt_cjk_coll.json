@@ -1,0 +1,35 @@
+{
+  "collationUCAData": "implicithan",
+  "featureFilters": {
+    "coll_ucadata": "include",
+    "coll_tree": "include"
+  },
+  "localeFilter": {
+    "filterType": "language",
+    "includeScripts": true,
+    "includeChildren": true,
+    "whitelist": [
+      "en",
+      "zh",
+      "ja",
+      "ko"
+    ]
+  },
+  "resourceFilters": [
+    {
+      "shards": [
+        "cjk",
+        "full"
+      ],
+      "categories": [
+        "coll_tree"
+      ],
+      "rules": [
+        "+/collations/default",
+        "+/collations/standard",
+        "+/collations/private-kana",
+        "-/UCARules"
+      ]
+    }
+  ]
+}
