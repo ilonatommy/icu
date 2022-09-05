@@ -120,7 +120,7 @@ $(eval $(call TargetBuildTemplate,icudt_no_cjk_zones,icudt_no_cjk_zones))
 $(eval $(call TargetBuildTemplate,icudt_no_cjk_locales,icudt_no_cjk_locales))
 
 
-ICU_SHARDS := icudt_base icudt_normalization icudt_currency icudt_cjk_zones icudt_no_cjk_zones icudt_efigs_zones icudt_efigs_locales icudt_cjk_locales icudt_no_cjk_locales icudt_efigs_coll icudt_cjk_coll icudt_no_cjk_coll icudt_efigs_full icudt_cjk_full icudt_no_cjk_full icudt_full_full
+ICU_SHARDS := icudt_base icudt_normalization icudt_currency icudt_cjk_zones icudt_no_cjk_zones icudt_efigs_zones icudt_full_zones icudt_efigs_locales icudt_cjk_locales icudt_no_cjk_locales icudt_full_locales icudt_efigs_coll icudt_cjk_coll icudt_no_cjk_coll icudt_full_coll icudt_efigs_full icudt_cjk_full icudt_no_cjk_full icudt_full_full
 DATA_SHARDS := $(addprefix data-, $(ICU_SHARDS))
 
 dictionary:
