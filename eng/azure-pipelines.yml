@@ -32,7 +32,7 @@ stages:
       ############ BROWSER BUILD ############
       - job: Build_Browser
         displayName: Browser
-        timeoutInMinutes: 40
+        timeoutInMinutes: 50
         pool:
           ${{ if eq(variables['System.TeamProject'], 'public') }}:
             vmImage: ubuntu-18.04
