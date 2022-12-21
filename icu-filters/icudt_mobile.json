@@ -264,6 +264,7 @@
                 "+/collations/default",
                 "+/collations/standard",
                 "+/collations/private-kana",
+                "+/collations/pinyin",
                 "-/UCARules"
             ]
         },
