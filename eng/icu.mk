@@ -43,13 +43,16 @@ include icu.$(TARGET_OS).mk
 
 UNAME_S := $(shell uname -s)
 LINKER_OVERRIDE = 
-ifeq ($(filter $(USE_DEFAULT_LINKER),false),)
 ifeq ($(UNAME_S),Linux)
 ifeq ($(TARGET_OS),browser)
-	LINKER_OVERRIDE = LDFLAGS=-fuse-ld=lld
+    # Check if lld is available
+    LLD_EXISTS := $(shell command -v lld 2> /dev/null)
+	ifneq ($(LLD_EXISTS),)
+        LINKER_OVERRIDE = LDFLAGS=-fuse-ld=lld
+    endif
 endif
 endif
-endif
+
 
 # Host build
 $(HOST_OBJDIR) $(TARGET_BINDIR) $(TARGET_OBJDIR):
