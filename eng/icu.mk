@@ -64,7 +64,8 @@ $(HOST_OBJDIR)/.stamp-host: $(HOST_OBJDIR)/.stamp-configure-host
 
 $(HOST_OBJDIR)/.stamp-configure-host: | $(HOST_OBJDIR)
 	cd $(HOST_OBJDIR) && $(TOP)/icu/icu4c/source/configure \
-	--disable-icu-config --disable-extras --disable-tests --disable-samples
+	--disable-icu-config --disable-extras --disable-tests --disable-samples \
+	$(LINKER_OVERRIDE)
 	touch $@
 
 
@@ -116,4 +117,4 @@ $(eval $(call TargetBuildTemplate,icudt_no_CJK,icudt_no_CJK))
 $(eval $(call TargetBuildTemplate,icudt_EFIGS,icudt_EFIGS))
 
 # build source+data for the main "icudt" filter and only data for the other filters
-all: lib-icudt data-icudt #data-icudt_no_CJK data-icudt_EFIGS data-icudt_CJK data-icudt_hybrid
+all: lib-icudt data-icudt data-icudt_no_CJK data-icudt_EFIGS data-icudt_CJK data-icudt_hybrid
