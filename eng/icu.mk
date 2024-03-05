@@ -53,7 +53,6 @@ ifeq ($(TARGET_OS),browser)
 endif
 endif
 
-
 # Host build
 $(HOST_OBJDIR) $(TARGET_BINDIR) $(TARGET_OBJDIR):
 	mkdir -p $@
