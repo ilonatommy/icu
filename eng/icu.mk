@@ -45,11 +45,11 @@ UNAME_S := $(shell uname -s)
 LINKER_OVERRIDE = 
 ifeq ($(UNAME_S),Linux)
 ifeq ($(TARGET_OS),browser)
-    # Check if lld is available
-    LLD_EXISTS := $(shell command -v lld 2> /dev/null)
+	# Check if lld is available
+	LLD_EXISTS := $(shell command -v lld 2> /dev/null)
 	ifneq ($(LLD_EXISTS),)
-        LINKER_OVERRIDE = LDFLAGS=-fuse-ld=lld
-    endif
+		LINKER_OVERRIDE = LDFLAGS=-fuse-ld=lld
+	endif
 endif
 endif
 
