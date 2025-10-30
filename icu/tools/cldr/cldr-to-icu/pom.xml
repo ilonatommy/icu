@@ -120,28 +120,28 @@
     </dependencies>
 
     <repositories>
-    <repository>
-      <id>central</id>
-      <url>https://pkgs.dev.azure.com/dnceng/internal/_packaging/internal_PublicPackages/maven/v1</url>
-      <releases>
-        <enabled>true</enabled>
-      </releases>
-      <snapshots>
-        <enabled>false</enabled>
-      </snapshots>
-    </repository>
-  </repositories>
+        <repository>
+            <id>central</id>
+            <url>https://pkgs.dev.azure.com/dnceng/internal/_packaging/internal_PublicPackages/maven/v1</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </repository>
+    </repositories>
 
-  <pluginRepositories>
-    <pluginRepository>
-      <id>central</id>
-      <url>https://pkgs.dev.azure.com/dnceng/internal/_packaging/internal_PublicPackages/maven/v1</url>
-      <releases>
-        <enabled>true</enabled>
-      </releases>
-      <snapshots>
-        <enabled>false</enabled>
-      </snapshots>
-    </pluginRepository>
-  </pluginRepositories>
+    <pluginRepositories>
+        <pluginRepository>
+            <id>central</id>
+            <url>https://pkgs.dev.azure.com/dnceng/internal/_packaging/internal_PublicPackages/maven/v1</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </pluginRepository>
+    </pluginRepositories>
 </project>
