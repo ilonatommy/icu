@@ -120,10 +120,28 @@
     </dependencies>
 
     <repositories>
-        <repository>
-            <id>githubcldr</id>
-            <name>GitHub unicode-org/icu Apache Maven Packages</name>
-            <url>https://maven.pkg.github.com/unicode-org/icu</url>
-        </repository>
-    </repositories>
+    <repository>
+      <id>central</id>
+      <url>https://pkgs.dev.azure.com/dnceng/internal/_packaging/internal_PublicPackages/maven/v1</url>
+      <releases>
+        <enabled>true</enabled>
+      </releases>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+    </repository>
+  </repositories>
+
+  <pluginRepositories>
+    <pluginRepository>
+      <id>central</id>
+      <url>https://pkgs.dev.azure.com/dnceng/internal/_packaging/internal_PublicPackages/maven/v1</url>
+      <releases>
+        <enabled>true</enabled>
+      </releases>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+    </pluginRepository>
+  </pluginRepositories>
 </project>
