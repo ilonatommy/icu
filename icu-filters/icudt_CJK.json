@@ -127,7 +127,8 @@
                 "-/*/*",
                 "+/collations/default",
                 "+/collations/standard",
-                "+/collations/private-kana"
+                "+/collations/private-kana",
+                "-/UCARules"
             ]
         },
         {
