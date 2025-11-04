@@ -24,6 +24,8 @@
 #include "unicode/uloc.h"
 #include "unicode/unistr.h"
 #include "unicode/utf16.h"
+#include <stdio.h>
+#include <string>
 #include "charstr.h"
 #include "cmemory.h"
 #include "collation.h"
@@ -32,6 +34,7 @@
 #include "collationsettings.h"
 #include "collationtailoring.h"
 #include "cstring.h"
+#include "hash.h"
 #include "patternprops.h"
 #include "uassert.h"
 #include "uvectr32.h"
@@ -59,12 +62,13 @@ CollationRuleParser::CollationRuleParser(const CollationData *base, UErrorCode &
         : nfd(*Normalizer2::getNFDInstance(errorCode)),
           nfc(*Normalizer2::getNFCInstance(errorCode)),
           rules(NULL), baseData(base), settings(NULL),
-          parseError(NULL), errorReason(NULL),
-          sink(NULL), importer(NULL),
-          ruleIndex(0) {
+        parseError(NULL), errorReason(NULL),
+        sink(NULL), importer(NULL),
+        ruleIndex(0), importRecursionGuard(nullptr) {
 }
 
 CollationRuleParser::~CollationRuleParser() {
+    delete importRecursionGuard;
 }
 
 void
@@ -641,8 +645,82 @@ CollationRuleParser::parseSetting(UErrorCode &errorCode) {
             if(importer == NULL) {
                 setParseError("[import langTag] is not supported", errorCode);
             } else {
+                const char *resolvedType = (length > 0 ? collationType : "standard");
+
+                char normalizedBase[ULOC_FULLNAME_CAPACITY];
+                UErrorCode normalizeStatus = U_ZERO_ERROR;
+                int32_t normalizedBaseLength = uloc_toLanguageTag(baseID, normalizedBase,
+                                                                  ULOC_FULLNAME_CAPACITY,
+                                                                  false, &normalizeStatus);
+                if(U_FAILURE(normalizeStatus) || normalizedBaseLength <= 0) {
+                    normalizeStatus = U_ZERO_ERROR;
+                    uprv_strncpy(normalizedBase, baseID, ULOC_FULLNAME_CAPACITY - 1);
+                    normalizedBase[ULOC_FULLNAME_CAPACITY - 1] = 0;
+                }
+                for(char *p = normalizedBase; *p != 0; ++p) {
+                    if(*p == '_') {
+                        *p = '-';
+                    } else {
+                        *p = static_cast<char>(uprv_tolower(*p));
+                    }
+                }
+
+                std::string normalizedType(resolvedType);
+                for(char &ch : normalizedType) {
+                    if(ch == '_') {
+                        ch = '-';
+                    } else {
+                        ch = static_cast<char>(uprv_tolower(ch));
+                    }
+                }
+
+                if(importRecursionGuard == nullptr) {
+                    UErrorCode tableStatus = U_ZERO_ERROR;
+                    importRecursionGuard = new Hashtable(tableStatus);
+                    if(importRecursionGuard == nullptr) {
+                        errorCode = U_MEMORY_ALLOCATION_ERROR;
+                        return;
+                    }
+                    if(U_FAILURE(tableStatus)) {
+                        delete importRecursionGuard;
+                        importRecursionGuard = nullptr;
+                        errorCode = tableStatus;
+                        return;
+                    }
+                }
+
+                UnicodeString importKey(normalizedBase, -1, US_INV);
+                importKey.append((UChar)0);
+                importKey.append(UnicodeString(normalizedType.c_str(), -1, US_INV));
+
+                UBool alreadyInFlight = importRecursionGuard->containsKey(importKey);
+                if(alreadyInFlight) {
+                    fprintf(stderr, "[collationruleparser] recursive import detected for %s / %s\n",
+                            normalizedBase, normalizedType.c_str());
+                    ruleIndex = j;
+                    return;
+                }
+
+                UErrorCode tableStatus = U_ZERO_ERROR;
+                // Store a non-null sentinel so the hash table retains the key.
+                importRecursionGuard->put(importKey, const_cast<CollationRuleParser *>(this), tableStatus);
+                if(U_FAILURE(tableStatus)) {
+                    errorCode = tableStatus;
+                    return;
+                }
+                struct ImportKeyCleanup {
+                    Hashtable *table;
+                    UnicodeString key;
+                    ImportKeyCleanup(Hashtable *t, const UnicodeString &k)
+                        : table(t), key(k) {}
+                    ~ImportKeyCleanup() {
+                        if(table != nullptr) {
+                            table->remove(key);
+                        }
+                    }
+                } cleanup(importRecursionGuard, importKey);
                 UnicodeString importedRules;
-                importer->getRules(baseID, length > 0 ? collationType : "standard",
+                importer->getRules(baseID, resolvedType,
                                    importedRules, errorReason, errorCode);
                 if(U_FAILURE(errorCode)) {
                     if(errorReason == NULL) {

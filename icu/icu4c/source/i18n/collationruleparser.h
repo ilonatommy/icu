@@ -29,6 +29,7 @@ U_NAMESPACE_BEGIN
 struct CollationData;
 struct CollationTailoring;
 
+class Hashtable;
 class Locale;
 class Normalizer2;
 
@@ -187,6 +188,8 @@ private:
 
     Sink *sink;
     Importer *importer;
+
+    Hashtable *importRecursionGuard;
 
     int32_t ruleIndex;
 };
