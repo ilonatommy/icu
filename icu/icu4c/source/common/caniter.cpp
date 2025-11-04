@@ -430,6 +430,14 @@ UnicodeString* CanonicalIterator::getEquivalents(const UnicodeString &segment, i
 }
 
 Hashtable *CanonicalIterator::getEquivalents2(Hashtable *fillinResult, const UChar *segment, int32_t segLen, UErrorCode &status) {
+    Hashtable visited(status);
+    if (U_FAILURE(status)) {
+        return NULL;
+    }
+    return collectEquivalentsRecursive(fillinResult, segment, segLen, visited, status);
+}
+
+Hashtable *CanonicalIterator::collectEquivalentsRecursive(Hashtable *fillinResult, const UChar *segment, int32_t segLen, Hashtable &visited, UErrorCode &status) {
 
     if (U_FAILURE(status)) {
         return NULL;
@@ -437,9 +445,27 @@ Hashtable *CanonicalIterator::getEquivalents2(Hashtable *fillinResult, const UCh
 
     //if (PROGRESS) printf("Adding: %s\n", UToS(Tr(segment)));
 
+    if (segment == NULL || segLen <= 0) {
+        return fillinResult;
+    }
+
     UnicodeString toPut(segment, segLen);
 
-    fillinResult->put(toPut, new UnicodeString(toPut), status);
+    if (visited.containsKey(toPut)) {
+        return fillinResult;
+    }
+
+    visited.put(toPut, nullptr, status);
+    if (U_FAILURE(status)) {
+        return NULL;
+    }
+
+    UnicodeString *initialValue = new UnicodeString(toPut);
+    if (initialValue == NULL) {
+        status = U_MEMORY_ALLOCATION_ERROR;
+        return NULL;
+    }
+    fillinResult->put(toPut, initialValue, status);
 
     UnicodeSet starts;
 
@@ -457,7 +483,7 @@ Hashtable *CanonicalIterator::getEquivalents2(Hashtable *fillinResult, const UCh
             UChar32 cp2 = iter.getCodepoint();
             Hashtable remainder(status);
             remainder.setValueDeleter(uprv_deleteUObject);
-            if (extract(&remainder, cp2, segment, segLen, i, status) == NULL) {
+            if (extract(&remainder, cp2, segment, segLen, i, visited, status) == NULL) {
                 continue;
             }
 
@@ -497,7 +523,7 @@ Hashtable *CanonicalIterator::getEquivalents2(Hashtable *fillinResult, const UCh
  * (with canonical rearrangement!)
  * If so, take the remainder, and return the equivalents 
  */
-Hashtable *CanonicalIterator::extract(Hashtable *fillinResult, UChar32 comp, const UChar *segment, int32_t segLen, int32_t segmentPos, UErrorCode &status) {
+Hashtable *CanonicalIterator::extract(Hashtable *fillinResult, UChar32 comp, const UChar *segment, int32_t segLen, int32_t segmentPos, Hashtable &visited, UErrorCode &status) {
 //Hashtable *CanonicalIterator::extract(UChar32 comp, const UnicodeString &segment, int32_t segLen, int32_t segmentPos, UErrorCode &status) {
     //if (PROGRESS) printf(" extract: %s, ", UToS(Tr(UnicodeString(comp))));
     //if (PROGRESS) printf("%s, %i\n", UToS(Tr(segment)), segmentPos);
@@ -578,7 +604,7 @@ Hashtable *CanonicalIterator::extract(Hashtable *fillinResult, UChar32 comp, con
         return NULL;
     }
 
-    return getEquivalents2(fillinResult, temp.getBuffer()+inputLen, temp.length()-inputLen, status);
+    return collectEquivalentsRecursive(fillinResult, temp.getBuffer()+inputLen, temp.length()-inputLen, visited, status);
 }
 
 U_NAMESPACE_END

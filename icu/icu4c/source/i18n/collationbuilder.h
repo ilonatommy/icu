@@ -36,6 +36,7 @@ class CEFinalizer;
 class CollationDataBuilder;
 class Normalizer2;
 class Normalizer2Impl;
+class Hashtable;
 
 class U_I18N_API CollationBuilder : public CollationRuleParser::Sink {
 public:
@@ -309,6 +310,7 @@ private:
 
     int64_t ces[Collation::MAX_EXPANSION_LENGTH];
     int32_t cesLength;
+    Hashtable *closureVisited;
 
     /**
      * Indexes of nodes with root primary weights, sorted by primary.

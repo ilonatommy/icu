@@ -32,6 +32,7 @@
 #include "unicode/utf16.h"
 #include "unicode/uversion.h"
 #include "cmemory.h"
+#include "hash.h"
 #include "collation.h"
 #include "collationbuilder.h"
 #include "collationdata.h"
@@ -203,7 +204,8 @@ CollationBuilder::CollationBuilder(const CollationTailoring *b, UBool icu4xMode,
           icu4xMode(icu4xMode),
           errorReason(NULL),
           cesLength(0),
-          rootPrimaryIndexes(errorCode), nodes(errorCode) {
+          rootPrimaryIndexes(errorCode), nodes(errorCode),
+          closureVisited(nullptr) {
     nfcImpl.ensureCanonIterData(errorCode);
     if(U_FAILURE(errorCode)) {
         errorReason = "CollationBuilder fields initialization failed";
@@ -225,6 +227,7 @@ CollationBuilder::CollationBuilder(const CollationTailoring *b, UErrorCode &erro
 
 CollationBuilder::~CollationBuilder() {
     delete dataBuilder;
+    delete closureVisited;
 }
 
 CollationTailoring *
@@ -1118,6 +1121,47 @@ CollationBuilder::addOnlyClosure(const UnicodeString &nfdPrefix, const UnicodeSt
                                  const int64_t newCEs[], int32_t newCEsLength, uint32_t ce32,
                                  UErrorCode &errorCode) {
     if(U_FAILURE(errorCode)) { return ce32; }
+
+    if(closureVisited == nullptr) {
+        UErrorCode status = U_ZERO_ERROR;
+        closureVisited = new Hashtable(status);
+        if(closureVisited == nullptr) {
+            errorCode = U_MEMORY_ALLOCATION_ERROR;
+            return ce32;
+        }
+        if(U_FAILURE(status)) {
+            delete closureVisited;
+            closureVisited = nullptr;
+            errorCode = status;
+            return ce32;
+        }
+    }
+
+    UnicodeString closureKey(nfdPrefix);
+    closureKey.append((UChar)0);
+    closureKey.append(nfdString);
+    // Skip if we are already in the middle of processing this prefix/string pair.
+    if(closureVisited->containsKey(closureKey)) {
+        return ce32;
+    }
+
+    UErrorCode tableStatus = U_ZERO_ERROR;
+    closureVisited->put(closureKey, nullptr, tableStatus);
+    if(U_FAILURE(tableStatus)) {
+        errorCode = tableStatus;
+        return ce32;
+    }
+    struct ClosureKeyCleanup {
+        Hashtable *table;
+        UnicodeString key;
+        ClosureKeyCleanup(Hashtable *t, const UnicodeString &k)
+                : table(t), key(k) {}
+        ~ClosureKeyCleanup() {
+            if(table != nullptr) {
+                table->remove(key);
+            }
+        }
+    } cleanup(closureVisited, closureKey);
 
     // Map from canonically equivalent input to the CEs. (But not from the all-NFD input.)
     if(nfdPrefix.isEmpty()) {
