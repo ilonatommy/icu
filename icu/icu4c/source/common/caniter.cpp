@@ -443,6 +443,8 @@ Hashtable *CanonicalIterator::collectEquivalentsRecursive(Hashtable *fillinResul
         return NULL;
     }
 
+    //if (PROGRESS) printf("Adding: %s\n", UToS(Tr(segment)));
+
     if (segment == NULL || segLen <= 0) {
         return fillinResult;
     }
